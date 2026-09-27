@@ -47,7 +47,10 @@ Thumbs.db
 Desktop.ini
 
 # Temporary and Uploaded Files
-uploads/
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 media/
 temp/
 tmp/
