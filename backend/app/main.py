@@ -2,9 +2,13 @@
 from typing import Dict
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.routers import auth_router, crops_router, farmer_crops_router
+
+# Ensure uploads directories exist
+settings.CROPS_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Initialize FastAPI Application
 app = FastAPI(
@@ -27,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static uploads directory for secure image serving (/uploads/crops/...)
+app.mount("/uploads", StaticFiles(directory=str(settings.UPLOAD_DIR)), name="uploads")
 
 # Register API Routers
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)

@@ -51,6 +51,10 @@ uploads/*
 !uploads/.gitkeep
 backend/uploads/*
 !backend/uploads/.gitkeep
+!backend/uploads/crops/
+!backend/uploads/crops/.gitkeep
+backend/uploads/crops/*
+!backend/uploads/crops/.gitkeep
 media/
 temp/
 tmp/

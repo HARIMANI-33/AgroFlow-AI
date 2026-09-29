@@ -1,18 +1,22 @@
 """API route handlers for Farmer Crop Listings and Public/Buyer Crop browsing."""
-from typing import List
+from datetime import date
+from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import require_farmer
+from app.core.storage import validate_and_save_crop_photo
 from app.database.database import get_db
+from app.models.crop_listing import CropStatus, SUPPORTED_CROPS
 from app.models.user import User
 from app.schemas.crop_listing import (
-    CropListingCreateRequest,
     CropListingResponse,
     CropListingUpdateRequest,
 )
 from app.services.crop_service import crop_service
+
+SUPPORTED_CROPS_LOOKUP = {c.lower(): c for c in SUPPORTED_CROPS}
 
 # Router for authenticated farmer crop management
 farmer_crops_router = APIRouter(prefix="/farmer/crops", tags=["Farmer Crops"])
@@ -29,18 +33,52 @@ crops_router = APIRouter(prefix="/crops", tags=["Crop Listings"])
     "",
     response_model=CropListingResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Create a new crop listing (Farmer only)",
+    summary="Create a new crop listing with photo (Farmer only)",
 )
 def create_crop_listing(
-    payload: CropListingCreateRequest,
+    crop_name: str = Form(..., description="Crop name (e.g., Tomato, Onion)"),
+    quantity_kg: float = Form(..., description="Available quantity in kilograms (> 0)"),
+    available_date: date = Form(..., description="Availability/harvest date (YYYY-MM-DD)"),
+    asking_price_per_kg: float = Form(..., description="Farmer asking price per kg (> 0)"),
+    photo: UploadFile = File(..., description="Real photo of the crop (JPG, PNG, WEBP, max 5MB)"),
     current_user: User = Depends(require_farmer),
     db: Session = Depends(get_db),
 ) -> CropListingResponse:
-    """Create a new crop listing for the authenticated farmer."""
+    """Create a new crop listing with produce photo for the authenticated farmer."""
+    # 1. Validate crop name
+    if not crop_name or not crop_name.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="crop_name cannot be empty.",
+        )
+    cleaned_name = crop_name.strip()
+    matched_crop = SUPPORTED_CROPS_LOOKUP.get(cleaned_name.lower())
+    canonical_crop_name = matched_crop if matched_crop else cleaned_name.title()
+
+    # 2. Validate numeric constraints
+    if quantity_kg <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="quantity_kg must be greater than 0.",
+        )
+    if asking_price_per_kg <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="asking_price_per_kg must be greater than 0.",
+        )
+
+    # 3. Validate and store crop photo safely
+    photo_path = validate_and_save_crop_photo(photo)
+
+    # 4. Save listing
     return crop_service.create_listing(
         db=db,
         farmer_id=current_user.id,
-        payload=payload,
+        crop_name=canonical_crop_name,
+        quantity_kg=quantity_kg,
+        available_date=available_date,
+        asking_price_per_kg=asking_price_per_kg,
+        photo_path=photo_path,
     )
 
 
@@ -63,20 +101,76 @@ def get_my_crop_listings(
 @farmer_crops_router.put(
     "/{id}",
     response_model=CropListingResponse,
-    summary="Update a crop listing owned by the logged-in farmer",
+    summary="Update a crop listing owned by the logged-in farmer and optionally replace its photo",
 )
 def update_crop_listing(
     id: UUID,
-    payload: CropListingUpdateRequest,
+    crop_name: Optional[str] = Form(None),
+    quantity_kg: Optional[float] = Form(None),
+    available_date: Optional[date] = Form(None),
+    asking_price_per_kg: Optional[float] = Form(None),
+    status_field: Optional[CropStatus] = Form(None, alias="status"),
+    photo: Optional[UploadFile] = File(None),
     current_user: User = Depends(require_farmer),
     db: Session = Depends(get_db),
 ) -> CropListingResponse:
-    """Update details of a crop listing owned by the authenticated farmer."""
+    """Update details of a crop listing owned by the authenticated farmer.
+    
+    If a new photo is provided, replaces the old image and removes the previous file from disk.
+    """
+    # Verify existence and ownership first before disk writes
+    existing = crop_service.get_listing_by_id(db, id)
+    if not existing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Crop listing not found.",
+        )
+    if existing.farmer_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to update another farmer's crop listing.",
+        )
+
+    # Validate numeric values if passed
+    if quantity_kg is not None and quantity_kg <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="quantity_kg must be greater than 0.",
+        )
+    if asking_price_per_kg is not None and asking_price_per_kg <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="asking_price_per_kg must be greater than 0.",
+        )
+
+    canonical_crop_name = None
+    if crop_name is not None:
+        if not crop_name.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="crop_name cannot be empty.",
+            )
+        matched_crop = SUPPORTED_CROPS_LOOKUP.get(crop_name.strip().lower())
+        canonical_crop_name = matched_crop if matched_crop else crop_name.strip().title()
+
+    new_photo_path = None
+    if photo and photo.filename:
+        new_photo_path = validate_and_save_crop_photo(photo)
+
+    payload = CropListingUpdateRequest(
+        crop_name=canonical_crop_name,
+        quantity_kg=quantity_kg,
+        available_date=available_date,
+        asking_price_per_kg=asking_price_per_kg,
+        status=status_field,
+    )
+
     return crop_service.update_listing(
         db=db,
         listing_id=id,
         farmer_id=current_user.id,
         payload=payload,
+        new_photo_path=new_photo_path,
     )
 
 
@@ -90,7 +184,7 @@ def cancel_crop_listing(
     current_user: User = Depends(require_farmer),
     db: Session = Depends(get_db),
 ) -> CropListingResponse:
-    """Cancel a crop listing owned by the authenticated farmer."""
+    """Cancel a crop listing owned by the authenticated farmer and safely remove its photo."""
     return crop_service.cancel_listing(
         db=db,
         listing_id=id,

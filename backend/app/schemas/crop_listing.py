@@ -67,6 +67,7 @@ class CropListingResponse(BaseModel):
     quantity_kg: float
     available_date: date
     asking_price_per_kg: float
+    photo_url: Optional[str] = None
     status: CropStatus
     created_at: datetime
     updated_at: datetime

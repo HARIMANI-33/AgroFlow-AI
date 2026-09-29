@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    # Upload Settings
+    UPLOAD_DIR: Path = BACKEND_DIR / "uploads"
+    CROPS_UPLOAD_DIR: Path = BACKEND_DIR / "uploads" / "crops"
+    MAX_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5 MB
+
     model_config = SettingsConfigDict(
         env_file=(str(BACKEND_DIR / ".env"), ".env"),
         env_file_encoding="utf-8",
