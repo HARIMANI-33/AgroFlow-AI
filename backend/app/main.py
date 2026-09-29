@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth_router
+from app.routers import auth_router, crops_router, farmer_crops_router
 
 # Initialize FastAPI Application
 app = FastAPI(
@@ -30,6 +30,8 @@ app.add_middleware(
 
 # Register API Routers
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
+app.include_router(farmer_crops_router, prefix=settings.API_V1_PREFIX)
+app.include_router(crops_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get(
