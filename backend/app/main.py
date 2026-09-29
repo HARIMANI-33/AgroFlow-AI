@@ -5,7 +5,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routers import auth_router, crops_router, farmer_crops_router
+from app.routers import (
+    auth_router,
+    buyer_orders_router,
+    buyer_requirements_router,
+    crops_router,
+    farmer_crops_router,
+    farmer_orders_router,
+    market_prices_router,
+    matching_router,
+    orders_router,
+    public_requirements_router,
+)
 
 # Ensure uploads directories exist
 settings.CROPS_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -39,6 +50,13 @@ app.mount("/uploads", StaticFiles(directory=str(settings.UPLOAD_DIR)), name="upl
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 app.include_router(farmer_crops_router, prefix=settings.API_V1_PREFIX)
 app.include_router(crops_router, prefix=settings.API_V1_PREFIX)
+app.include_router(market_prices_router, prefix=settings.API_V1_PREFIX)
+app.include_router(buyer_requirements_router, prefix=settings.API_V1_PREFIX)
+app.include_router(public_requirements_router, prefix=settings.API_V1_PREFIX)
+app.include_router(matching_router, prefix=settings.API_V1_PREFIX)
+app.include_router(buyer_orders_router, prefix=settings.API_V1_PREFIX)
+app.include_router(farmer_orders_router, prefix=settings.API_V1_PREFIX)
+app.include_router(orders_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get(
