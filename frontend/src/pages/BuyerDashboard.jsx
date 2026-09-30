@@ -384,6 +384,28 @@ const BuyerDashboard = () => {
                         </span>
                       </div>
 
+                      {/* Farmer Phone / Contact for direct negotiation */}
+                      <div className="crop-card-row">
+                        <span className="label">📞 {t('phoneNumber')}:</span>
+                        <span className="val" style={{ fontWeight: 600, textAlign: 'right' }}>
+                          {crop.farmer_phone ? (
+                            <a
+                              href={`tel:${crop.farmer_phone}`}
+                              style={{
+                                color: 'var(--primary)',
+                                textDecoration: 'none',
+                                fontWeight: 700,
+                              }}
+                              title={t('callToNegotiate')}
+                            >
+                              {crop.farmer_phone}
+                            </a>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)' }}>{t('pickupNotSpecified')}</span>
+                          )}
+                        </span>
+                      </div>
+
                       {/* Current availability status */}
                       <div
                         style={{

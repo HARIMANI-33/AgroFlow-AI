@@ -96,6 +96,11 @@ class CropListing(Base):
         """Returns the farmer's registered city."""
         return self.farmer.city if self.farmer else None
 
+    @property
+    def farmer_phone(self) -> Optional[str]:
+        """Returns the farmer's registered phone number."""
+        return self.farmer.phone if self.farmer else None
+
     def __repr__(self) -> str:
         return (
             f"<CropListing(id={self.id}, crop_name='{self.crop_name}', "

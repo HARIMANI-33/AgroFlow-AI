@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     // Brand & Navigation
-    brandName: "AGROFLOW AI",
+    brandName: "AGROFLOW",
     tagline: "Direct Farm-to-Buyer Marketplace",
     home: "Home",
     logout: "Logout",
@@ -11,7 +11,7 @@ export const translations = {
     language: "Language",
 
     // Entry Screen
-    welcomeTitle: "WELCOME TO AGROFLOW AI",
+    welcomeTitle: "WELCOME TO AGROFLOW",
     welcomeSubtitle: "Connecting Indian farmers and buyers directly, eliminating intermediaries and ensuring fair prices.",
     chooseRole: "Please select how you want to continue:",
     farmerCardTitle: "FARMER",
@@ -60,7 +60,7 @@ export const translations = {
     farmerAuthSubtitle: "Log in or register to sell your harvest directly to verified buyers.",
     buyerAuthSubtitle: "Log in or register to source quality produce directly from local farmers.",
     noEmailNoAadhaarNotice: "Simple registration: Only username required. No phone, email, or Aadhaar needed.",
-    authBrandHeading: "AGROFLOW AI",
+    authBrandHeading: "AGROFLOW",
     authBrandTagline: "Connecting farmers and buyers directly — no middlemen, fair prices, transparent trade.",
     authBrandFeature1: "Direct farmer-to-buyer marketplace",
     authBrandFeature2: "Smart AI-powered matching",
@@ -173,6 +173,7 @@ export const translations = {
     filterByCity: "Filter by City",
     allCrops: "All Crops",
     allCities: "All Cities",
+    callToNegotiate: "Call to Negotiate",
     buyNowBtn: "Create Direct Order",
     sellerFarmer: "Farmer",
     askingPrice: "Farmer's Asking Price",
@@ -279,7 +280,7 @@ export const translations = {
 
   ta: {
     // Brand & Navigation
-    brandName: "அக்ரோஃப்ளோ ஏஐ",
+    brandName: "அக்ரோஃப்ளோ",
     tagline: "நேரடி விவசாயி - வாங்குபவர் சந்தைத்தளம்",
     home: "முகப்பு",
     logout: "வெளியேறு",
@@ -289,7 +290,7 @@ export const translations = {
     language: "மொழி",
 
     // Entry Screen
-    welcomeTitle: "அக்ரோஃப்ளோ ஏஐ - க்கு நல்வரவு",
+    welcomeTitle: "அக்ரோஃப்ளோ - க்கு நல்வரவு",
     welcomeSubtitle: "இடைத்தரகர்கள் இன்றி, நியாயமான விலையில் விவசாயிகளையும் வாங்குபவர்களையும் நேரடியாக இணைக்கும் தளம்.",
     chooseRole: "நீங்கள் எவ்வாறு தொடர விரும்புகிறீர்கள் என்பதைத் தேர்ந்தெடுக்கவும்:",
     farmerCardTitle: "விவசாயி",
@@ -338,7 +339,7 @@ export const translations = {
     farmerAuthSubtitle: "உங்கள் விளைபொருட்களை இடைத்தரகர் இன்றி விற்க உள்நுழையவும் அல்லது பதிவு செய்யவும்.",
     buyerAuthSubtitle: "விவசாயிகளிடமிருந்து தரமான பயிர்களை நேரடியாக கொள்முதல் செய்ய உள்நுழையவும் அல்லது பதிவு செய்யவும்.",
     noEmailNoAadhaarNotice: "எளிமையான பதிவு: பயனர் பெயர் மட்டுமே போதும். தொலைபேசி, மின்னஞ்சல் அல்லது ஆதார் எண் தேவையில்லை.",
-    authBrandHeading: "அக்ரோஃப்ளோ ஏஐ",
+    authBrandHeading: "அக்ரோஃப்ளோ",
     authBrandTagline: "இடைத்தரகர்கள் இன்றி விவசாயிகளையும் வாங்குபவர்களையும் நேரடியாக இணைக்கும் — நியாயமான விலை, வெளிப்படையான வர்த்தகம்.",
     authBrandFeature1: "நேரடி விவசாயி - வாங்குபவர் சந்தைத்தளம்",
     authBrandFeature2: "ஏஐ-இயக்கும் ஸ்மார்ட் பொருத்தம்",
@@ -451,6 +452,7 @@ export const translations = {
     filterByCity: "ஊர் வாரியாக வடிகட்டு",
     allCrops: "அனைத்து பயிர்கள்",
     allCities: "அனைத்து ஊர்கள்",
+    callToNegotiate: "பேச்சுவார்த்தை நடத்த அழைக்கவும்",
     buyNowBtn: "நேரடி ஆர்டர் செய்க",
     sellerFarmer: "விவசாயி",
     askingPrice: "விவசாயியின் கேட்கும் விலை",

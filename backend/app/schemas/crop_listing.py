@@ -73,6 +73,7 @@ class CropListingResponse(BaseModel):
     pickup_location: Optional[str] = None
     farmer_name: Optional[str] = None
     farmer_city: Optional[str] = None
+    farmer_phone: Optional[str] = None
     status: CropStatus
     created_at: datetime
     updated_at: datetime

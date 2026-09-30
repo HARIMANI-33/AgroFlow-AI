@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <p style={{ fontSize: '1.2rem', color: 'var(--primary-dark)', fontWeight: 600 }}>Loading AGROFLOW AI...</p>
+        <p style={{ fontSize: '1.2rem', color: 'var(--primary-dark)', fontWeight: 600 }}>Loading AGROFLOW...</p>
       </div>
     );
   }
