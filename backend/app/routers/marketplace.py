@@ -15,6 +15,7 @@ from app.schemas.marketplace import (
     OrderCreateRequest,
     OrderResponse,
     OrderStatusUpdateRequest,
+    RegisteredBuyerProfile,
     RequirementMatchesResponse,
 )
 from app.services.market_price_service import market_price_service
@@ -151,6 +152,18 @@ def get_open_requirements(
 ) -> List[BuyerRequirementResponse]:
     """Return all open produce demand requirements that farmers can browse and supply."""
     return requirement_service.get_open_requirements(db)
+
+
+@public_requirements_router.get(
+    "/buyers",
+    response_model=List[RegisteredBuyerProfile],
+    summary="Get all registered wholesale buyers directory for farmers",
+)
+def get_registered_buyers(
+    db: Session = Depends(get_db),
+) -> List[RegisteredBuyerProfile]:
+    """Return all registered buyers with their latest open demand requirement."""
+    return requirement_service.get_registered_buyers(db)
 
 
 @public_requirements_router.get(

@@ -15,6 +15,7 @@ class CropListingBase(BaseModel):
     quantity_kg: float = Field(..., gt=0, description="Available quantity in kilograms, must be > 0")
     available_date: date = Field(..., description="Date from which the crop harvest is available")
     asking_price_per_kg: float = Field(..., gt=0, description="Farmer requested asking price per kg, must be > 0")
+    pickup_location: Optional[str] = Field(None, max_length=255, description="Pickup / Destination location")
 
     @field_validator("crop_name", mode="before")
     @classmethod
@@ -43,6 +44,7 @@ class CropListingUpdateRequest(BaseModel):
     quantity_kg: Optional[float] = Field(None, gt=0)
     available_date: Optional[date] = None
     asking_price_per_kg: Optional[float] = Field(None, gt=0)
+    pickup_location: Optional[str] = None
     status: Optional[CropStatus] = None
 
     @field_validator("crop_name", mode="before")
@@ -68,6 +70,9 @@ class CropListingResponse(BaseModel):
     available_date: date
     asking_price_per_kg: float
     photo_url: Optional[str] = None
+    pickup_location: Optional[str] = None
+    farmer_name: Optional[str] = None
+    farmer_city: Optional[str] = None
     status: CropStatus
     created_at: datetime
     updated_at: datetime

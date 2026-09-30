@@ -10,6 +10,7 @@ from app.schemas.auth import (
     LoginRequest,
     TokenResponse,
     TokenPayload,
+    UsernameCheckResponse,
 )
 from app.schemas.crop_listing import (
     CropListingBase,
@@ -39,6 +40,7 @@ __all__ = [
     "LoginRequest",
     "TokenResponse",
     "TokenPayload",
+    "UsernameCheckResponse",
     "CropListingBase",
     "CropListingCreateRequest",
     "CropListingUpdateRequest",

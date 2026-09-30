@@ -10,10 +10,24 @@ from app.models.user import UserRole
 
 class UserBase(BaseModel):
     """Shared user attributes."""
+    username: str = Field(..., min_length=3, max_length=100, description="Unique username for login")
     name: str = Field(..., min_length=1, max_length=255, description="Full name or business name")
-    phone: str = Field(..., min_length=10, max_length=15, description="Mobile contact number")
     address: str = Field(..., min_length=1, max_length=500, description="Full address or village")
     city: str = Field(..., min_length=1, max_length=100, description="City or district")
+
+    @field_validator("username", mode="before")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        if isinstance(v, str):
+            cleaned = v.strip().lower()
+            if not cleaned:
+                raise ValueError("Username cannot be empty")
+            if len(cleaned) < 3:
+                raise ValueError("Username must be at least 3 characters")
+            if not re.match(r"^[a-z0-9_]+$", cleaned):
+                raise ValueError("Username can only contain lowercase letters, numbers, and underscores")
+            return cleaned
+        raise ValueError("Invalid username format")
 
     @field_validator("name", "address", "city", mode="before")
     @classmethod
@@ -24,26 +38,20 @@ class UserBase(BaseModel):
                 raise ValueError("Field cannot be empty or whitespace only")
         return v
 
-    @field_validator("phone", mode="before")
-    @classmethod
-    def validate_phone(cls, v: str) -> str:
-        if isinstance(v, str):
-            cleaned = re.sub(r"[\s\-\(\)]", "", v.strip())
-            # Support 10-digit numbers or prefixed with +91 / 91
-            if cleaned.startswith("+91"):
-                cleaned = cleaned[3:]
-            elif cleaned.startswith("91") and len(cleaned) == 12:
-                cleaned = cleaned[2:]
-            if not re.match(r"^[0-9]{10,15}$", cleaned):
-                raise ValueError("Phone number must contain between 10 and 15 digits")
-            return cleaned
-        raise ValueError("Invalid phone number format")
-
 
 class UserRegisterBase(UserBase):
     """Base schema for registration including password confirmation."""
+    phone: Optional[str] = Field(None, max_length=20, description="Contact phone number")
     password: str = Field(..., min_length=6, max_length=128, description="Account password")
     confirm_password: str = Field(..., min_length=6, max_length=128, description="Password confirmation")
+
+    @field_validator("phone", mode="before")
+    @classmethod
+    def clean_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and isinstance(v, str):
+            cleaned = v.strip()
+            return cleaned if cleaned else None
+        return v
 
     @model_validator(mode="after")
     def passwords_match(self) -> "UserRegisterBase":
@@ -65,8 +73,9 @@ class BuyerRegisterRequest(UserRegisterBase):
 class UserResponse(BaseModel):
     """Public, safe user representation (no passwords/hashes)."""
     id: UUID
+    username: str
     name: str
-    phone: str
+    phone: Optional[str] = None
     address: str
     city: str
     role: UserRole

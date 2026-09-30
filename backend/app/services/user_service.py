@@ -23,6 +23,16 @@ class UserService:
         return db.query(User).filter(User.phone == phone).first()
 
     @staticmethod
+    def get_by_username(db: Session, username: str) -> Optional[User]:
+        """Fetch user by unique username (case-insensitive)."""
+        return db.query(User).filter(User.username == username.lower()).first()
+
+    @staticmethod
+    def is_username_taken(db: Session, username: str) -> bool:
+        """Check if a username is already registered."""
+        return db.query(User).filter(User.username == username.lower()).first() is not None
+
+    @staticmethod
     def register_user(
         db: Session,
         user_data: UserRegisterBase,
@@ -31,18 +41,32 @@ class UserService:
         """Register a new user with hashed password and designated role.
         
         Raises:
-            HTTPException: 409 Conflict if phone number is already registered.
+            HTTPException: 409 Conflict if username is already registered.
         """
-        existing_user = UserService.get_by_phone(db, user_data.phone)
+        existing_user = UserService.get_by_username(db, user_data.username)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="A user with this phone number is already registered.",
+                detail="Username already taken. Please choose another username.",
             )
 
+        phone = getattr(user_data, "phone", None)
+        if phone:
+            phone = phone.strip()
+            if not phone:
+                phone = None
+            else:
+                existing_phone = db.query(User).filter(User.phone == phone).first()
+                if existing_phone:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="Phone number already registered. Please use another phone number.",
+                    )
+
         new_user = User(
+            username=user_data.username.lower(),
             name=user_data.name,
-            phone=user_data.phone,
+            phone=phone,
             address=user_data.address,
             city=user_data.city,
             password_hash=hash_password(user_data.password),
@@ -57,14 +81,14 @@ class UserService:
     @staticmethod
     def authenticate(
         db: Session,
-        phone: str,
+        username: str,
         password: str
     ) -> Optional[User]:
-        """Authenticate user by phone and plain password.
+        """Authenticate user by username and plain password.
         
         Returns User instance if valid, None otherwise.
         """
-        user = UserService.get_by_phone(db, phone)
+        user = UserService.get_by_username(db, username)
         if not user:
             return None
         if not verify_password(password, user.password_hash):

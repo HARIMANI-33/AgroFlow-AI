@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.buyer_requirement import BuyerRequirement, RequirementStatus
+from app.models.user import User, UserRole
 from app.schemas.marketplace import (
     BuyerRequirementCreateRequest,
     BuyerRequirementUpdateRequest,
@@ -125,6 +126,53 @@ class RequirementService:
         db.commit()
         db.refresh(req)
         return req
+
+    @staticmethod
+    def get_registered_buyers(db: Session) -> List[dict]:
+        """Fetch all registered buyers with their latest open produce requirement for directory view."""
+        buyers = (
+            db.query(User)
+            .filter(User.role == UserRole.BUYER, User.is_active == True)
+            .order_by(User.created_at.desc())
+            .all()
+        )
+
+        result = []
+        for buyer in buyers:
+            active_req = (
+                db.query(BuyerRequirement)
+                .filter(
+                    BuyerRequirement.buyer_id == buyer.id,
+                    BuyerRequirement.status == RequirementStatus.OPEN,
+                )
+                .order_by(BuyerRequirement.created_at.desc())
+                .first()
+            )
+
+            req_brief = None
+            if active_req:
+                req_brief = {
+                    "id": active_req.id,
+                    "crop_name": active_req.crop_name,
+                    "quantity_kg": active_req.quantity_kg,
+                    "required_date": active_req.required_date,
+                    "preferred_price_per_kg": active_req.preferred_price_per_kg,
+                    "quality_requirement": active_req.quality_requirement,
+                    "delivery_city": active_req.delivery_city,
+                    "status": active_req.status,
+                }
+
+            result.append({
+                "id": buyer.id,
+                "username": buyer.username,
+                "name": buyer.name,
+                "role": buyer.role.value if hasattr(buyer.role, "value") else str(buyer.role),
+                "phone": buyer.phone,
+                "address": buyer.address,
+                "city": buyer.city,
+                "active_requirement": req_brief,
+            })
+        return result
 
 
 requirement_service = RequirementService()

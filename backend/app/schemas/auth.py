@@ -6,20 +6,15 @@ from app.schemas.user import UserResponse
 
 
 class LoginRequest(BaseModel):
-    """Phone and password login credentials."""
-    phone: str = Field(..., min_length=10, max_length=15, description="Registered phone number")
+    """Username and password login credentials."""
+    username: str = Field(..., min_length=3, max_length=100, description="Account username")
     password: str = Field(..., min_length=1, description="Account password")
 
-    @field_validator("phone", mode="before")
+    @field_validator("username", mode="before")
     @classmethod
-    def clean_phone(cls, v: str) -> str:
+    def clean_username(cls, v: str) -> str:
         if isinstance(v, str):
-            cleaned = re.sub(r"[\s\-\(\)]", "", v.strip())
-            if cleaned.startswith("+91"):
-                cleaned = cleaned[3:]
-            elif cleaned.startswith("91") and len(cleaned) == 12:
-                cleaned = cleaned[2:]
-            return cleaned
+            return v.strip().lower()
         return v
 
 
@@ -35,3 +30,10 @@ class TokenPayload(BaseModel):
     sub: str
     role: str
     exp: Optional[int] = None
+
+
+class UsernameCheckResponse(BaseModel):
+    """Response for username availability check."""
+    username: str
+    available: bool
+    message: str

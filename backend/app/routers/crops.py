@@ -41,6 +41,7 @@ def create_crop_listing(
     available_date: date = Form(..., description="Availability/harvest date (YYYY-MM-DD)"),
     asking_price_per_kg: float = Form(..., description="Farmer asking price per kg (> 0)"),
     photo: UploadFile = File(..., description="Real photo of the crop (JPG, PNG, WEBP, max 5MB)"),
+    pickup_location: Optional[str] = Form(None, description="Pickup / Destination location"),
     current_user: User = Depends(require_farmer),
     db: Session = Depends(get_db),
 ) -> CropListingResponse:
@@ -70,6 +71,9 @@ def create_crop_listing(
     # 3. Validate and store crop photo safely
     photo_path = validate_and_save_crop_photo(photo)
 
+    # Clean pickup location if provided
+    cleaned_pickup = pickup_location.strip() if (pickup_location and pickup_location.strip()) else None
+
     # 4. Save listing
     return crop_service.create_listing(
         db=db,
@@ -79,6 +83,7 @@ def create_crop_listing(
         available_date=available_date,
         asking_price_per_kg=asking_price_per_kg,
         photo_path=photo_path,
+        pickup_location=cleaned_pickup,
     )
 
 
@@ -109,6 +114,7 @@ def update_crop_listing(
     quantity_kg: Optional[float] = Form(None),
     available_date: Optional[date] = Form(None),
     asking_price_per_kg: Optional[float] = Form(None),
+    pickup_location: Optional[str] = Form(None),
     status_field: Optional[CropStatus] = Form(None, alias="status"),
     photo: Optional[UploadFile] = File(None),
     current_user: User = Depends(require_farmer),
@@ -157,11 +163,14 @@ def update_crop_listing(
     if photo and photo.filename:
         new_photo_path = validate_and_save_crop_photo(photo)
 
+    cleaned_pickup = pickup_location.strip() if (pickup_location and pickup_location.strip()) else None
+
     payload = CropListingUpdateRequest(
         crop_name=canonical_crop_name,
         quantity_kg=quantity_kg,
         available_date=available_date,
         asking_price_per_kg=asking_price_per_kg,
+        pickup_location=cleaned_pickup,
         status=status_field,
     )
 

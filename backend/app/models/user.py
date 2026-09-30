@@ -1,6 +1,6 @@
 """SQLAlchemy User Model for AGROFLOW AI.
 
-Represents FARMER and BUYER accounts with unique phone authentication.
+Represents FARMER and BUYER accounts with unique username authentication.
 """
 import enum
 import uuid
@@ -28,8 +28,9 @@ class User(Base):
         index=True,
         nullable=False,
     )
+    username = Column(String(100), unique=True, index=True, nullable=False)
     name = Column(String(255), nullable=False)
-    phone = Column(String(20), unique=True, index=True, nullable=False)
+    phone = Column(String(20), unique=True, index=True, nullable=True)
     address = Column(String(500), nullable=False)
     city = Column(String(100), nullable=False)
     password_hash = Column(String(255), nullable=False)
@@ -52,4 +53,4 @@ class User(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<User(id={self.id}, phone={self.phone}, role={self.role})>"
+        return f"<User(id={self.id}, username={self.username}, role={self.role})>"

@@ -22,6 +22,7 @@ class CropService:
         available_date: date,
         asking_price_per_kg: float,
         photo_path: Optional[str] = None,
+        pickup_location: Optional[str] = None,
     ) -> CropListing:
         """Create a new crop listing with photo for the specified authenticated farmer."""
         listing = CropListing(
@@ -31,6 +32,7 @@ class CropService:
             available_date=available_date,
             asking_price_per_kg=asking_price_per_kg,
             photo_path=photo_path,
+            pickup_location=pickup_location,
             status=CropStatus.ACTIVE,
         )
         db.add(listing)
@@ -55,10 +57,15 @@ class CropService:
     def get_active_listings(
         db: Session
     ) -> List[CropListing]:
-        """Fetch all active crop listings visible to buyers."""
+        """Fetch all active crop listings with remaining quantity visible to buyers."""
+        from sqlalchemy.orm import joinedload
         return (
             db.query(CropListing)
-            .filter(CropListing.status == CropStatus.ACTIVE)
+            .options(joinedload(CropListing.farmer))
+            .filter(
+                CropListing.status == CropStatus.ACTIVE,
+                CropListing.quantity_kg > 0,
+            )
             .order_by(CropListing.created_at.desc())
             .all()
         )

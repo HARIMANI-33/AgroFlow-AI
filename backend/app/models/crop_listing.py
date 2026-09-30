@@ -55,6 +55,7 @@ class CropListing(Base):
     available_date = Column(Date, nullable=False)
     asking_price_per_kg = Column(Float, nullable=False)
     photo_path = Column(String(500), nullable=True)
+    pickup_location = Column(String(255), nullable=True)
     status = Column(
         SQLEnum(CropStatus, name="crop_status", create_type=True),
         default=CropStatus.ACTIVE,
@@ -84,6 +85,16 @@ class CropListing(Base):
         # Extract safe filename and construct web URL
         filename = self.photo_path.replace("\\", "/").split("/")[-1]
         return f"/uploads/crops/{filename}"
+
+    @property
+    def farmer_name(self) -> Optional[str]:
+        """Returns the farmer's display name safely."""
+        return self.farmer.name if self.farmer else None
+
+    @property
+    def farmer_city(self) -> Optional[str]:
+        """Returns the farmer's registered city."""
+        return self.farmer.city if self.farmer else None
 
     def __repr__(self) -> str:
         return (

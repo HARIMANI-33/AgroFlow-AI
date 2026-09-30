@@ -172,3 +172,36 @@ class OrderResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ---------------------------------------------------------------------------
+# Registered Buyer Directory (for Farmers)
+# ---------------------------------------------------------------------------
+
+class BuyerRequirementBrief(BaseModel):
+    """Brief public demand specification for a registered buyer."""
+    id: UUID
+    crop_name: str
+    quantity_kg: float
+    required_date: date
+    preferred_price_per_kg: float
+    quality_requirement: Optional[str] = None
+    delivery_city: str
+    status: RequirementStatus
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RegisteredBuyerProfile(BaseModel):
+    """Safe representation of a registered wholesale buyer for farmers to view."""
+    id: UUID
+    username: str
+    name: str
+    role: str
+    phone: Optional[str] = None
+    address: str
+    city: str
+    active_requirement: Optional[BuyerRequirementBrief] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
